@@ -317,13 +317,3 @@ exports.contarPlantillasPorTipo = (req, res) => {
         res.status(200).json({ count });
     });
 };
-
-
-// exports.obtenerExamenesActivos = (req, res) => {
-//   Examen.listarExamenes((err, examenes) => {
-//     if (err) {
-//       return res.status(500).json({ mensaje: 'Error al obtener los exámenes' });
-//     }
-//     res.json(examenes);
-//   });
-// };

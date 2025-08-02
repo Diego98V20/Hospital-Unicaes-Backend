@@ -134,15 +134,15 @@ Examen.listarExamenesCompletados = (callback) => {
                             u.apellido AS doctor_apellido,
                             t.nombre AS examen_nombre,
                             m.nombre_muestra,
-                            e.fecha_solicitud
-                            
+                            e.fecha_solicitud,
+                            e.nombre_laboratorista -- <--- ¡AÑADIR ESTA LÍNEA!
                             FROM paciente p
                             JOIN muestra m ON p.id_paciente=m.id_paciente
                             JOIN examen e ON e.id_muestra = m.id_muestra
                             JOIN usuario u ON e.id_usuario = u.id_usuario
                             JOIN tipo_examen t ON e.id_tipo_examen= t.id_tipo_examen
                             WHERE e.estado = 'completado';`;
-//e.nombre_laboratorista -- <--- ¡AÑADIR ESTA LÍNEA!
+
     db.query(sql, (err, results) => {
         if (err) {
             console.error("model: Error al listar los examenes completados:", err);
@@ -422,7 +422,5 @@ Examen.contarPlantillasPorTipo = (id_tipo_examen, callback) => {
         return callback(null, results[0].count);
     });
 };
-
-
 
 module.exports = Examen;

@@ -39,7 +39,5 @@ router.put('/tipos-examen/:id_tipo_examen', authMiddleware, examenController.act
 router.delete('/tipos-examen/:id_tipo_examen', authMiddleware, examenController.eliminarTipoExamen);
 router.get('/tipos-examen/:id_tipo_examen/plantillas-count', authMiddleware, examenController.contarPlantillasPorTipo);
 
-//router.get('/', authMiddleware, examenController.obtenerExamenesActivos);
-
 
 module.exports = router;
