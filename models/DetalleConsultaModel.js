@@ -1,8 +1,5 @@
 const db = require('../database/conexion')
-
-
 const DetalleConsulta = {};
-
 
 // Listar consultas (activas)
 DetalleConsulta.listarDetallesConsultasActivas = (callback) => {
@@ -16,7 +13,6 @@ DetalleConsulta.listarDetallesConsultasActivas = (callback) => {
         return callback(null, results);
     });
 };
-
 
 DetalleConsulta.listarDetalleConsultasById = (id, callback) => {
 
@@ -33,7 +29,6 @@ DetalleConsulta.listarDetalleConsultasById = (id, callback) => {
 }
 
 //hacer la consulta aqui? para imprimir el pdf
-
 DetalleConsulta.listarDetalleConsultasByIdDetallePDF = (id, callback) => {
     //const sql = `CALL sp_ListarConsultaById`;
     const sql = `SELECT CONCAT(p.nombre_paciente, ' ', p.apellido_paciente) AS nombre_paciente, p.n_expediente, c.fecha_consulta AS fecha, tc.nombre_tipo_consulta AS tipo_consulta, c.estado_paciente, c.motivo_consulta AS motivo_enfermeria, ec.nombre_estado_consulta AS estado_consulta, dc.motivo_consulta AS motivo_consulta_detalle, dc.presente_enfermedad, dc.antecedentes, dc.presion_arterial, dc.frecuencia_cardiaca, dc.saturacion_oxigeno, dc.temperatura, dc.peso, dc.altura, dc.diagnostico, dc.observaciones, dc.examen_fisico FROM detalle_consulta dc LEFT JOIN consulta c ON dc.id_consulta = c.id_consulta LEFT JOIN paciente p ON c.id_paciente = p.id_paciente LEFT JOIN tipo_consulta tc ON c.id_tipo_consulta = tc.id_tipo_consulta LEFT JOIN estado_consulta ec ON dc.id_estado_consulta = ec.id_estado_consulta LEFT JOIN usuario u ON c.id_usuario = u.id_usuario WHERE c.id_usuario = (?) ORDER BY dc.id_detalle_consulta DESC LIMIT 1;
@@ -48,7 +43,6 @@ DetalleConsulta.listarDetalleConsultasByIdDetallePDF = (id, callback) => {
     });
 
 }
-
 
 DetalleConsulta.insertarDetalleConsulta = (consultaDetalleData, callback) => {
   const sql = `CALL sp_InsertarDetalleConsulta(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
@@ -122,10 +116,35 @@ DetalleConsulta.insertarDetalleConsulta = (consultaDetalleData, callback) => {
     }
 
     const id_paciente = rows[0].id_paciente;
-    // 2. Insertar muestra
+
+    // Obtener el contador actual para ese tipo de muestra y paciente
+  db.query(
+    `SELECT COUNT(*) AS total FROM muestra WHERE id_paciente = ? AND id_tipo_muestra = ?`,
+    [id_paciente, id_tipo_muestra],
+    (err, resultadoConteo) => {
+      if (err) {
+        console.error("Error al contar muestras previas:", err);
+        return callback(err, null);
+      }
+
+      const total = resultadoConteo[0].total + 1;
+
+      // Asignar un prefijo según el tipo de muestra
+      let prefijo = '';
+      switch (id_tipo_muestra) {
+        case 1: prefijo = 'SAN'; break; // sangre
+        case 2: prefijo = 'ORI'; break; // orina
+        case 3: prefijo = 'HEC'; break; // heces
+        default: prefijo = 'MUE'; break; // defecto
+      }
+
+    const nombre_muestra = `${prefijo}${total.toString().padStart(2, '0')}`;
+
+    // Insertar la muestra con nombre_muestra generado
     db.query(
-      `INSERT INTO muestra (id_paciente, id_tipo_muestra, fecha_toma) VALUES (?, ?, NOW())`,
-      [id_paciente, id_tipo_muestra],
+      `INSERT INTO muestra (id_paciente, id_tipo_muestra, nombre_muestra, fecha_toma)
+       VALUES (?, ?, ?, NOW())`,
+      [id_paciente, id_tipo_muestra, nombre_muestra],
       (err, resultadoMuestra) => {
         if (err) {
           console.error("Error al insertar muestra:", err);
@@ -143,6 +162,7 @@ DetalleConsulta.insertarDetalleConsulta = (consultaDetalleData, callback) => {
             return callback(null, { mensaje: "Detalle y exámenes/medicamentos guardados con éxito." });
           }
         };
+        
 
         examenes.forEach((id_tipo_examen) => {
           insertsPendientes++;
@@ -201,9 +221,8 @@ DetalleConsulta.insertarDetalleConsulta = (consultaDetalleData, callback) => {
     );
   });
   });
+})
 };
-
-
 
 DetalleConsulta.actualizarDetalleConsulta = (id, consultaDetalleData, callback) => {
     const sql = `CALL sp_ActualizarDetalleConsulta(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
@@ -249,8 +268,6 @@ DetalleConsulta.actualizarDetalleConsulta = (id, consultaDetalleData, callback) 
         return callback(null, result);
     });
 };
-
-
 
 
 // Cambiar estado del detalle de la consulta, metodo DELETE pero solo cambio de estado,  no elimina registros (no es recomendado)
