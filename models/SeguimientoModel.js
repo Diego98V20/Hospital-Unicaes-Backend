@@ -79,8 +79,10 @@ Seguimiento.obtenerSeguimientoPorConsulta = (id_consulta, callback) => {
                     direccion_paciente: consulta.direccion_paciente,
                     medicamentos: medicamentos.map(m => ({
                         nombre_medicamento: m.nombre_medicamento,
+                        cantidad: m.cantidad,
                         dosis: m.dosis,
-                        frecuencia: m.frecuencia
+                        frecuencia: m.frecuencia,
+                        duracion: m.duracion
                     })),
                     examenes: examenes.map(e => ({
                           nombre_examen: e.nombre_examen,
