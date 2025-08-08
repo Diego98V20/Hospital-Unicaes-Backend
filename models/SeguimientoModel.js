@@ -36,7 +36,8 @@ Seguimiento.obtenerSeguimientoPorConsulta = (id_consulta, callback) => {
             dr.cantidad,
             dr.dosis,
             dr.frecuencia,
-            dr.duracion
+            dr.duracion,
+            dr.estado
             FROM receta_medica rm
             JOIN detalle_receta dr ON rm.id_receta = dr.id_receta
             JOIN medicamento m ON dr.id_medicamento = m.id_medicamento
@@ -82,7 +83,8 @@ Seguimiento.obtenerSeguimientoPorConsulta = (id_consulta, callback) => {
                         cantidad: m.cantidad,
                         dosis: m.dosis,
                         frecuencia: m.frecuencia,
-                        duracion: m.duracion
+                        duracion: m.duracion,
+                        estado: m.estado
                     })),
                     examenes: examenes.map(e => ({
                           nombre_examen: e.nombre_examen,
